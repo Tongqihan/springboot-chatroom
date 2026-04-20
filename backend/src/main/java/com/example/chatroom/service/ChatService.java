@@ -1,6 +1,12 @@
 package com.example.chatroom.service;
 
+import com.example.chatroom.dto.ChatMessageRequest;
+import com.example.chatroom.dto.ChatMessageResponse;
+import java.util.List;
+
 public interface ChatService {
 
-    String getProjectStage();
+    ChatMessageResponse saveMessage(ChatMessageRequest request);
+
+    List<ChatMessageResponse> getRecentMessages(int limit);
 }

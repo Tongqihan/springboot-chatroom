@@ -8,6 +8,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
+/**
+ * 聊天消息实体。
+ */
 @Entity
 @Table(name = "chat_message")
 public class ChatMessage {
@@ -17,24 +20,24 @@ public class ChatMessage {
     private Long id;
 
     @Column(nullable = false, length = 50)
-    private String sender;
+    private String username;
 
     @Column(nullable = false, length = 1000)
     private String content;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime timestamp;
 
     public Long getId() {
         return id;
     }
 
-    public String getSender() {
-        return sender;
+    public String getUsername() {
+        return username;
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getContent() {
@@ -45,11 +48,11 @@ public class ChatMessage {
         this.content = content;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public LocalDateTime getTimestamp() {
+        return timestamp;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 }

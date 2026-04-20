@@ -1,13 +1,13 @@
-# SpringBoot Chatroom (Skeleton)
+# SpringBoot Chatroom
 
-这是一个**前后端分离聊天室**项目的首个可维护骨架版本，当前仅完成目录结构、基础配置和占位代码，便于后续渐进式开发。
+前后端分离聊天室项目。当前已完成 **backend 最小可用群聊能力**，frontend 仍保持骨架不变。
 
-## 1. 技术栈
+## 技术栈
 
-- Backend: Spring Boot 3 + Maven + Java 17
-- Frontend: React 18 + Vite 5
+- Backend: Spring Boot 3, Maven, Java 17, Spring WebSocket(STOMP), Spring Data JPA, H2
+- Frontend: React 18 + Vite 5（本次未修改）
 
-## 2. 仓库结构
+## 仓库结构
 
 ```text
 .
@@ -15,7 +15,6 @@
 │   ├── pom.xml
 │   └── src/main
 │       ├── java/com/example/chatroom
-│       │   ├── ChatroomBackendApplication.java
 │       │   ├── common
 │       │   ├── config
 │       │   ├── controller
@@ -29,99 +28,53 @@
 │       └── resources
 │           └── application.yml
 └── frontend
-    ├── index.html
-    ├── package.json
-    ├── vite.config.js
-    └── src
-        ├── api
-        ├── components
-        ├── hooks
-        ├── pages
-        ├── store
-        ├── styles
-        ├── utils
-        ├── App.jsx
-        └── main.jsx
 ```
 
-## 3. 当前已完成内容（仅骨架）
+## Backend 已实现功能（MVP）
 
-### Backend
+- STOMP WebSocket 连接：`/ws/chat`
+- 客户端发送群聊消息（应用目的地）：`/app/chat.send`
+- 服务器广播消息（订阅目的地）：`/topic/messages`
+- 消息持久化到 H2 内存数据库
+- REST 查询最近聊天记录：`GET /api/messages/recent?limit=50`
+- 健康检查接口：`GET /api/health`
 
-- Maven 工程初始化（含 web/websocket/validation/jpa/h2/test 依赖）
-- 启动类 `ChatroomBackendApplication`
-- 分层目录及占位类：
-  - `config`: `CorsConfig`
-  - `controller`: `HealthController`
-  - `service` / `service/impl`: `ChatService`, `ChatServiceImpl`
-  - `repository`: `ChatMessageRepository`
-  - `entity`: `ChatMessage`
-  - `dto`: `ChatMessageDto`
-  - `websocket`: `WebSocketConfig`
-  - `exception`: `GlobalExceptionHandler`
-  - `common`: `ApiResponse`
+### 消息结构
 
-### Frontend
+```json
+{
+  "id": 1,
+  "username": "alice",
+  "content": "hello",
+  "timestamp": "2026-04-20T12:00:00"
+}
+```
 
-- Vite + React 基础工程
-- 目录分层及占位文件：
-  - `api`: `chatApi.js`
-  - `components`: `ChatLayout.jsx`
-  - `pages`: `ChatPage.jsx`
-  - `hooks`: `useChat.js`
-  - `store`: `chatStore.js`
-  - `utils`: `constants.js`
-  - `styles`: `index.css`
-- `App.jsx` 挂载基础页面，确保启动后可见占位内容
+## 本地启动
 
-## 4. 后续开发计划（建议迭代）
-
-### 阶段 A：基础能力完善
-
-1. 后端：补充统一返回码、业务异常体系、日志规范
-2. 前端：引入路由（React Router）、HTTP 客户端（axios）封装
-3. 前后端：统一环境变量与配置（端口、API 前缀）
-
-### 阶段 B：聊天室核心功能
-
-1. 用户进入房间（昵称 + 房间号）
-2. 历史消息拉取（REST）
-3. 实时消息收发（WebSocket/STOMP）
-4. 在线用户列表同步
-
-### 阶段 C：工程化与质量
-
-1. 后端单元测试/集成测试
-2. 前端组件测试与 E2E 测试
-3. Docker 化与 CI/CD
-
-## 5. 本地启动思路
-
-### 启动 Backend
+### 1) 启动 backend
 
 ```bash
 cd backend
 mvn spring-boot:run
 ```
 
-默认端口：`8080`，可用健康检查接口：`GET /api/health`
+默认端口：`8080`
 
-### 启动 Frontend
+### 2) 验证 REST 接口
 
 ```bash
-cd frontend
-npm install
-npm run dev
+curl "http://localhost:8080/api/health"
+curl "http://localhost:8080/api/messages/recent?limit=20"
 ```
 
-默认端口：`5173`，通过浏览器访问 Vite 本地地址即可。
+### 3) H2 控制台（可选）
 
-## 6. 约定与维护建议
+- 地址：`http://localhost:8080/h2-console`
+- JDBC URL：`jdbc:h2:mem:chatroom;MODE=MYSQL;DB_CLOSE_DELAY=-1`
+- 用户名：`sa`
+- 密码：空
 
-- 先保留清晰分层，不在初期把业务逻辑耦合到 controller 或页面组件。
-- DTO / Entity / API 类型分离，避免后续重构成本过高。
-- 每次迭代只实现一个子目标，保证可测试、可回滚、可评审。
+## CORS 说明
 
----
-
-> 当前提交目标是“打好骨架，不一次性实现所有功能”。下一步建议从“进入房间 + 消息列表”最小闭环开始。
+backend 已开放本地联调所需 CORS：`http://localhost:5173`。
