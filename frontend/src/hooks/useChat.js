@@ -49,6 +49,10 @@ export function useChat(nickname) {
           return;
         }
         setConnectionStatus(CONNECTION_STATUS.DISCONNECTED);
+        setState((previous) => ({
+          ...previous,
+          wsError: previous.wsError || 'WebSocket 已断开，正在尝试重连',
+        }));
       },
       onStompError: (errorMessage) => {
         if (!mounted) {

@@ -88,7 +88,7 @@ npm run dev
 > frontend 默认使用：
 >
 > - REST：`http://localhost:8080`
-> - WebSocket：`ws://localhost:8080/ws/chat`
+> - WebSocket：`ws://localhost:8080/ws/chat`（默认会根据 REST 地址自动推导）
 >
 > 如需修改，可在 frontend 目录创建 `.env`：
 >
@@ -121,4 +121,26 @@ curl "http://localhost:8080/api/messages/recent?limit=20"
 
 ## CORS 说明
 
-backend 已开放本地联调所需 CORS：`http://localhost:5173`。
+backend 已开放本地联调所需 CORS / WebSocket Origin：
+
+- `http://localhost:5173`
+- `http://127.0.0.1:5173`
+
+## 前后端联调检查清单（已对齐）
+
+1. REST 地址：前端默认 `http://localhost:8080`，可通过 `VITE_API_BASE_URL` 覆盖。
+2. WebSocket 地址：默认由 REST 地址自动推导为 `ws://<host>:<port>/ws/chat`，也可显式配置 `VITE_WS_BASE_URL`。
+3. REST 历史接口：`GET /api/messages/recent?limit=50`，进入聊天室时自动加载。
+4. WebSocket 收发路径：
+   - 建连：`/ws/chat`
+   - 发送：`/app/chat.send`
+   - 订阅：`/topic/messages`
+5. 消息字段统一：`id` / `username` / `content` / `timestamp`。
+6. 基础错误提示：
+   - 后端 REST 不可用时会提示“后端不可用，请确认后端服务已启动”
+   - WebSocket 连接失败或断开时有页面提示
+
+## 已知限制
+
+- 当前后端使用 H2 内存库，重启 backend 后历史消息会丢失。
+- 当前仅实现最小群聊能力（无登录鉴权、无消息撤回、无离线消息同步）。
