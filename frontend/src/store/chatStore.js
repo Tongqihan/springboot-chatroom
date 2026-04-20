@@ -1,4 +1,15 @@
-// Placeholder for global chat state management (e.g., Zustand/Redux later).
-export const chatStore = {
-  messages: [],
-};
+export function createInitialChatState() {
+  return {
+    messages: [],
+    historyError: '',
+    wsError: '',
+  };
+}
+
+export function addMessage(messages, message) {
+  return [...messages, message];
+}
+
+export function setHistory(messages) {
+  return [...messages];
+}
