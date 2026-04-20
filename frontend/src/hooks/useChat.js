@@ -51,7 +51,7 @@ export function useChat(nickname) {
         setConnectionStatus(CONNECTION_STATUS.DISCONNECTED);
         setState((previous) => ({
           ...previous,
-          wsError: previous.wsError || 'WebSocket 已断开，正在尝试重连',
+          wsError: 'WebSocket 已断开，正在每 3 秒自动重连',
         }));
       },
       onStompError: (errorMessage) => {
