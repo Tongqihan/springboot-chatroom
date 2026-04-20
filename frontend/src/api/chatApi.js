@@ -25,7 +25,7 @@ export async function fetchRecentMessages(limit = DEFAULT_HISTORY_LIMIT) {
   return request(`/api/messages/recent?limit=${limit}`);
 }
 
-export function createChatSocket({ onMessage, onConnect, onDisconnect, onStompError, onWebSocketError }) {
+export function createChatSocket({ onMessage, onPresence, onConnect, onDisconnect, onStompError, onWebSocketError }) {
   const client = new Client({
     brokerURL: WS_BASE_URL,
     reconnectDelay: 3000,
@@ -37,6 +37,11 @@ export function createChatSocket({ onMessage, onConnect, onDisconnect, onStompEr
     client.subscribe(WS_DESTINATIONS.TOPIC_MESSAGES, (frame) => {
       const message = JSON.parse(frame.body);
       onMessage?.(message);
+    });
+
+    client.subscribe(WS_DESTINATIONS.TOPIC_PRESENCE, (frame) => {
+      const presence = JSON.parse(frame.body);
+      onPresence?.(presence);
     });
 
     onConnect?.();
@@ -69,6 +74,18 @@ export function createChatSocket({ onMessage, onConnect, onDisconnect, onStompEr
       client.publish({
         destination: WS_DESTINATIONS.SEND_MESSAGE,
         body: JSON.stringify(payload),
+      });
+    },
+    joinChat(username) {
+      client.publish({
+        destination: WS_DESTINATIONS.JOIN_CHAT,
+        body: JSON.stringify({ username }),
+      });
+    },
+    leaveChat(username) {
+      client.publish({
+        destination: WS_DESTINATIONS.LEAVE_CHAT,
+        body: JSON.stringify({ username }),
       });
     },
     isConnected() {

@@ -1,7 +1,17 @@
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 
-export function ChatLayout({ nickname, messages, connectionStatus, historyError, wsError, onSend, onLeave }) {
+export function ChatLayout({
+  nickname,
+  messages,
+  onlineCount,
+  onlineUsers,
+  connectionStatus,
+  historyError,
+  wsError,
+  onSend,
+  onLeave,
+}) {
   const isConnected = connectionStatus === 'connected';
   const statusLabelMap = {
     connected: '已连接',
@@ -17,12 +27,26 @@ export function ChatLayout({ nickname, messages, connectionStatus, historyError,
         <div>
           <h1>聊天室</h1>
           <p>当前用户：{nickname}</p>
+          <p>在线人数：{onlineCount}</p>
         </div>
         <div className="chat-status-wrap">
           <span className={`status ${connectionStatus}`}>连接状态：{statusLabel}</span>
           <button className="secondary" onClick={onLeave}>退出</button>
         </div>
       </header>
+
+      <section className="online-users">
+        <h2>在线用户</h2>
+        {onlineUsers.length > 0 ? (
+          <ul>
+            {onlineUsers.map((user) => (
+              <li key={user}>{user}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>暂无在线用户</p>
+        )}
+      </section>
 
       {historyError ? <p className="error">历史消息加载失败：{historyError}</p> : null}
       {wsError ? <p className="error connection-error">连接异常：{wsError}</p> : null}

@@ -60,7 +60,8 @@ public class ChatServiceImpl implements ChatService {
                 message.getId(),
                 message.getUsername(),
                 message.getContent(),
-                message.getTimestamp()
+                message.getTimestamp(),
+                "CHAT"
         );
     }
 }
