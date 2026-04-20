@@ -11,6 +11,6 @@ public class HealthController {
 
     @GetMapping
     public ApiResponse<String> health() {
-        return ApiResponse.ok("Backend skeleton is running", "OK");
+        return ApiResponse.ok("服务正常", "OK");
     }
 }
