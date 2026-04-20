@@ -24,6 +24,25 @@
 5. 连续发送多条消息，确认列表会自动滚动到最新消息。
 6. 停止 backend 或断开网络后，确认页面显示“连接异常/已断开，自动重连”提示；恢复 backend 后观察连接状态恢复。
 
+## v0.3 在线用户管理与系统提示
+
+本次版本在 v0.2 基础上扩展了在线态能力，保持现有前后端架构不变，新增：
+
+- 聊天室头部显示实时在线人数。
+- 页面展示在线用户昵称列表（按昵称排序）。
+- 用户进入聊天室时，广播系统提示消息（例如：`test2 加入了聊天室`）。
+- 用户主动退出或连接断开时，广播系统提示消息（例如：`test2 离开了聊天室`）。
+- 在线人数、在线用户列表、系统提示均通过 WebSocket 实时同步，无轮询。
+
+### v0.3 手动验证步骤
+
+1. 启动 backend 与 frontend，打开两个浏览器窗口并输入不同昵称。
+2. 第 2 个用户进入后，观察两个窗口消息列表中出现“xxx 加入了聊天室”的系统提示。
+3. 观察页面头部在线人数从 1 变为 2，在线用户列表展示两个昵称。
+4. 让任一用户点击“退出”按钮，观察消息列表出现“xxx 离开了聊天室”的系统提示。
+5. 再观察在线人数与用户列表实时减少。
+6. 可直接关闭一个浏览器标签页，验证断开连接后在线人数与在线列表也会同步更新。
+
 ## 技术栈
 
 - Backend: Spring Boot 3, Maven, Java 17, Spring WebSocket(STOMP), Spring Data JPA, H2
@@ -65,7 +84,9 @@
 
 - STOMP WebSocket 连接：`/ws/chat`
 - 客户端发送群聊消息（应用目的地）：`/app/chat.send`
-- 服务器广播消息（订阅目的地）：`/topic/messages`
+- 客户端发送上线/离线事件：`/app/chat.join`、`/app/chat.leave`
+- 服务器广播聊天与系统提示消息：`/topic/messages`
+- 服务器广播在线人数与在线用户列表：`/topic/presence`
 - 消息持久化到 H2 内存数据库
 - REST 查询最近聊天记录：`GET /api/messages/recent?limit=50`
 - 健康检查接口：`GET /api/health`
@@ -77,7 +98,8 @@
   "id": 1,
   "username": "alice",
   "content": "hello",
-  "timestamp": "2026-04-20T12:00:00"
+  "timestamp": "2026-04-20T12:00:00",
+  "type": "CHAT"
 }
 ```
 
@@ -120,9 +142,11 @@ npm run dev
 
 1. 在 frontend 输入昵称并进入聊天室。
 2. 页面会先请求 `GET /api/messages/recent?limit=50` 加载历史消息。
-3. 然后建立 STOMP WebSocket 连接到 `/ws/chat` 并订阅 `/topic/messages`。
-4. 点击发送后，前端向 `/app/chat.send` 发布消息。
-5. 后端保存消息后广播给所有订阅客户端，前端实时更新列表。
+3. 然后建立 STOMP WebSocket 连接到 `/ws/chat` 并订阅 `/topic/messages` 与 `/topic/presence`。
+4. 连接成功后前端向 `/app/chat.join` 发送上线事件。
+5. 点击发送后，前端向 `/app/chat.send` 发布消息。
+6. 点击退出或页面卸载时，前端向 `/app/chat.leave` 发送离线事件。
+7. 后端广播聊天消息、系统提示、在线用户状态，前端实时更新列表与在线人数。
 
 ### 4) 验证 REST 接口（可选）
 
@@ -152,9 +176,9 @@ backend 已开放本地联调所需 CORS / WebSocket Origin：
 3. REST 历史接口：`GET /api/messages/recent?limit=50`，进入聊天室时自动加载。
 4. WebSocket 收发路径：
    - 建连：`/ws/chat`
-   - 发送：`/app/chat.send`
-   - 订阅：`/topic/messages`
-5. 消息字段统一：`id` / `username` / `content` / `timestamp`。
+   - 发送：`/app/chat.send` / `/app/chat.join` / `/app/chat.leave`
+   - 订阅：`/topic/messages` / `/topic/presence`
+5. 消息字段统一：`id` / `username` / `content` / `timestamp` / `type`（`CHAT` 或 `SYSTEM`）。
 6. 基础错误提示：
    - 后端 REST 不可用时会提示“后端不可用，请确认后端服务已启动”
    - WebSocket 连接失败或断开时有页面提示

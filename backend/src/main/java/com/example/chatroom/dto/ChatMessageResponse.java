@@ -9,6 +9,7 @@ public record ChatMessageResponse(
         Long id,
         String username,
         String content,
-        LocalDateTime timestamp
+        LocalDateTime timestamp,
+        String type
 ) {
 }

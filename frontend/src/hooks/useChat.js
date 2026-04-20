@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createChatSocket, fetchRecentMessages } from '../api/chatApi';
 import { CONNECTION_STATUS } from '../utils/constants';
-import { addMessage, createInitialChatState, setHistory } from '../store/chatStore';
+import { addMessage, createInitialChatState, setHistory, setPresence } from '../store/chatStore';
 
 export function useChat(nickname) {
   const [state, setState] = useState(createInitialChatState);
@@ -37,11 +37,18 @@ export function useChat(nickname) {
         }
         setState((previous) => ({ ...previous, messages: addMessage(previous.messages, message) }));
       },
+      onPresence: (presence) => {
+        if (!mounted) {
+          return;
+        }
+        setState((previous) => ({ ...previous, ...setPresence(presence) }));
+      },
       onConnect: () => {
         if (!mounted) {
           return;
         }
         setConnectionStatus(CONNECTION_STATUS.CONNECTED);
+        socket.joinChat(nickname);
         setState((previous) => ({ ...previous, wsError: '' }));
       },
       onDisconnect: () => {
@@ -75,6 +82,9 @@ export function useChat(nickname) {
 
     return () => {
       mounted = false;
+      if (socket.isConnected()) {
+        socket.leaveChat(nickname);
+      }
       socket.disconnect();
       socketRef.current = null;
       setConnectionStatus(CONNECTION_STATUS.DISCONNECTED);
@@ -95,6 +105,8 @@ export function useChat(nickname) {
 
   return {
     messages: state.messages,
+    onlineCount: state.onlineCount,
+    onlineUsers: state.onlineUsers,
     historyError: state.historyError,
     wsError: state.wsError,
     connectionStatus,

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { MESSAGE_TYPE } from '../utils/constants';
 import { formatTime } from '../utils/time';
 
 export function MessageList({ messages, currentUser }) {
@@ -15,11 +16,15 @@ export function MessageList({ messages, currentUser }) {
   return (
     <ul className="message-list" ref={listRef}>
       {messages.map((message) => {
+        const type = message.type ?? MESSAGE_TYPE.CHAT;
+        const isSystem = type === MESSAGE_TYPE.SYSTEM;
         const isMine = message.username === currentUser;
+        const itemClassName = isSystem ? 'system' : isMine ? 'mine' : 'theirs';
+
         return (
           <li
-            key={`${message.id ?? 'temp'}-${message.timestamp}-${message.content}`}
-            className={isMine ? 'mine' : 'theirs'}
+            key={`${message.id ?? 'temp'}-${message.timestamp}-${message.username}-${message.content}`}
+            className={itemClassName}
           >
             <div className="message-meta">
               <strong>{message.username}</strong>

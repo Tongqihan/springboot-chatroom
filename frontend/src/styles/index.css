@@ -115,6 +115,29 @@ button:disabled {
   color: #991b1b;
 }
 
+.online-users {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.online-users h2 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.online-users ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.online-users p {
+  margin: 0;
+  color: #6b7280;
+}
+
 .message-list {
   list-style: none;
   padding: 0;
@@ -142,6 +165,18 @@ button:disabled {
 
 .message-list li.theirs {
   align-self: flex-start;
+}
+
+.message-list li.system {
+  align-self: center;
+  max-width: 90%;
+  border-style: dashed;
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.message-list li.system .message-meta strong {
+  color: #475569;
 }
 
 .message-meta {

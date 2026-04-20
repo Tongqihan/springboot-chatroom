@@ -6,7 +6,15 @@ export const DEFAULT_HISTORY_LIMIT = 50;
 
 export const WS_DESTINATIONS = {
   SEND_MESSAGE: '/app/chat.send',
+  JOIN_CHAT: '/app/chat.join',
+  LEAVE_CHAT: '/app/chat.leave',
   TOPIC_MESSAGES: '/topic/messages',
+  TOPIC_PRESENCE: '/topic/presence',
+};
+
+export const MESSAGE_TYPE = {
+  CHAT: 'CHAT',
+  SYSTEM: 'SYSTEM',
 };
 
 export const CONNECTION_STATUS = {
