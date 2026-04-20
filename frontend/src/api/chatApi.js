@@ -2,7 +2,12 @@ import { Client } from '@stomp/stompjs';
 import { API_BASE_URL, DEFAULT_HISTORY_LIMIT, WS_BASE_URL, WS_DESTINATIONS } from '../utils/constants';
 
 async function request(path) {
-  const response = await fetch(`${API_BASE_URL}${path}`);
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`);
+  } catch (error) {
+    throw new Error('后端不可用，请确认后端服务已启动');
+  }
 
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`);
@@ -38,6 +43,10 @@ export function createChatSocket({ onMessage, onConnect, onDisconnect, onStompEr
   };
 
   client.onDisconnect = () => {
+    onDisconnect?.();
+  };
+
+  client.onWebSocketClose = () => {
     onDisconnect?.();
   };
 
