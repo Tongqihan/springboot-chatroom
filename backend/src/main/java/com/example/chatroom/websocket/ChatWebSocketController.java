@@ -3,6 +3,7 @@ package com.example.chatroom.websocket;
 import com.example.chatroom.dto.ChatMessageRequest;
 import com.example.chatroom.dto.ChatMessageResponse;
 import com.example.chatroom.dto.PresenceUpdateResponse;
+import com.example.chatroom.dto.MessageType;
 import com.example.chatroom.dto.UserPresenceRequest;
 import com.example.chatroom.service.ChatService;
 import com.example.chatroom.service.OnlineUserService;
@@ -86,7 +87,7 @@ public class ChatWebSocketController {
                 "系统",
                 content,
                 LocalDateTime.now(),
-                "SYSTEM"
+                MessageType.SYSTEM.name()
         );
         messagingTemplate.convertAndSend(BROADCAST_DESTINATION, systemMessage);
     }
