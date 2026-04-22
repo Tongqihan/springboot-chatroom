@@ -35,7 +35,7 @@ export function ChatLayout({
         </div>
         <div className="chat-status-wrap">
           <span className={`status ${connectionStatus}`}>连接状态：{statusLabel}</span>
-          <button className="secondary" onClick={onLeave}>退出</button>
+          <button className="secondary" onClick={onLeave}>退出聊天室</button>
         </div>
       </header>
 
@@ -61,11 +61,15 @@ export function ChatLayout({
         )}
       </section>
 
-      {historyError ? <p className="error">历史消息加载失败：{historyError}</p> : null}
-      {wsError ? <p className="error connection-error">连接异常：{wsError}</p> : null}
+      <section className="message-panel">
+        {historyError ? <p className="error">历史消息加载失败：{historyError}</p> : null}
+        {wsError ? <p className="error connection-error">连接异常：{wsError}</p> : null}
+        <MessageList messages={messages} currentUser={nickname} />
+      </section>
 
-      <MessageList messages={messages} currentUser={nickname} />
-      <MessageInput onSend={onSend} disabled={!isConnected} />
+      <section className="message-input-wrap">
+        <MessageInput onSend={onSend} disabled={!isConnected} />
+      </section>
     </section>
   );
 }

@@ -16,8 +16,8 @@ export function EntryForm({ defaultRoom, onEnter }) {
 
   return (
     <section className="entry-card">
-      <h1>进入聊天室</h1>
-      <p>输入昵称并选择房间，开始实时群聊。</p>
+      <h1>SpringBoot Chatroom</h1>
+      <p>v0.5.1 UI 升级版：输入昵称并选择房间，开始实时群聊。</p>
 
       <form onSubmit={handleSubmit} className="entry-form entry-form-column">
         <input
@@ -32,7 +32,7 @@ export function EntryForm({ defaultRoom, onEnter }) {
             <option key={roomName} value={roomName}>{roomName}</option>
           ))}
         </select>
-        <button type="submit">进入</button>
+        <button type="submit">进入聊天室</button>
       </form>
     </section>
   );
