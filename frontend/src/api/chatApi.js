@@ -21,11 +21,11 @@ async function request(path) {
   return payload.data;
 }
 
-export async function fetchRecentMessages(limit = DEFAULT_HISTORY_LIMIT) {
-  return request(`/api/messages/recent?limit=${limit}`);
+export async function fetchRecentMessages(room, limit = DEFAULT_HISTORY_LIMIT) {
+  return request(`/api/messages/recent?room=${encodeURIComponent(room)}&limit=${limit}`);
 }
 
-export function createChatSocket({ onMessage, onPresence, onConnect, onDisconnect, onStompError, onWebSocketError }) {
+export function createChatSocket({ room, onMessage, onPresence, onConnect, onDisconnect, onStompError, onWebSocketError }) {
   const client = new Client({
     brokerURL: WS_BASE_URL,
     reconnectDelay: 3000,
@@ -34,12 +34,12 @@ export function createChatSocket({ onMessage, onPresence, onConnect, onDisconnec
   });
 
   client.onConnect = () => {
-    client.subscribe(WS_DESTINATIONS.TOPIC_MESSAGES, (frame) => {
+    client.subscribe(WS_DESTINATIONS.roomMessages(room), (frame) => {
       const message = JSON.parse(frame.body);
       onMessage?.(message);
     });
 
-    client.subscribe(WS_DESTINATIONS.TOPIC_PRESENCE, (frame) => {
+    client.subscribe(WS_DESTINATIONS.roomPresence(room), (frame) => {
       const presence = JSON.parse(frame.body);
       onPresence?.(presence);
     });
@@ -76,16 +76,16 @@ export function createChatSocket({ onMessage, onPresence, onConnect, onDisconnec
         body: JSON.stringify(payload),
       });
     },
-    joinChat(username) {
+    joinChat(username, joinedRoom) {
       client.publish({
         destination: WS_DESTINATIONS.JOIN_CHAT,
-        body: JSON.stringify({ username }),
+        body: JSON.stringify({ username, room: joinedRoom }),
       });
     },
-    leaveChat(username) {
+    leaveChat(username, leftRoom) {
       client.publish({
         destination: WS_DESTINATIONS.LEAVE_CHAT,
-        body: JSON.stringify({ username }),
+        body: JSON.stringify({ username, room: leftRoom }),
       });
     },
     isConnected() {

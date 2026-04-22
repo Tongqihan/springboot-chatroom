@@ -8,5 +8,5 @@ public interface ChatService {
 
     ChatMessageResponse saveMessage(ChatMessageRequest request);
 
-    List<ChatMessageResponse> getRecentMessages(int limit);
+    List<ChatMessageResponse> getRecentMessages(String room, int limit);
 }

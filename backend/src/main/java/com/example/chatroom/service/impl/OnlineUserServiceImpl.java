@@ -1,5 +1,6 @@
 package com.example.chatroom.service.impl;
 
+import com.example.chatroom.common.ChatRoom;
 import com.example.chatroom.dto.PresenceUpdateResponse;
 import com.example.chatroom.service.OnlineUserService;
 import java.util.ArrayList;
@@ -14,68 +15,75 @@ import org.springframework.stereotype.Service;
 @Service
 public class OnlineUserServiceImpl implements OnlineUserService {
 
-    private final ConcurrentHashMap<String, String> sessionUserMap = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Integer> usernameSessionCount = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, SessionRoomUser> sessionStateMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ConcurrentHashMap<String, Integer>> roomUserSessionCount = new ConcurrentHashMap<>();
 
     @Override
-    public synchronized PresenceUpdateResponse userJoined(String sessionId, String username) {
-        String normalizedUsername = normalize(username);
+    public synchronized PresenceUpdateResponse userJoined(String sessionId, String username, String room) {
+        String normalizedUsername = normalizeUsername(username);
+        String normalizedRoom = ChatRoom.normalizeAndValidate(room);
         if (normalizedUsername == null || sessionId == null || sessionId.isBlank()) {
-            return snapshot();
+            return snapshot(normalizedRoom);
         }
 
-        String previousUser = sessionUserMap.put(sessionId, normalizedUsername);
-        if (previousUser != null) {
-            decreaseUserCount(previousUser);
+        SessionRoomUser previous = sessionStateMap.put(sessionId, new SessionRoomUser(normalizedUsername, normalizedRoom));
+        if (previous != null) {
+            decreaseUserCount(previous.room(), previous.username());
         }
-        increaseUserCount(normalizedUsername);
-        return snapshot();
+
+        increaseUserCount(normalizedRoom, normalizedUsername);
+        return snapshot(normalizedRoom);
     }
 
     @Override
     public synchronized PresenceUpdateResponse userLeftBySession(String sessionId) {
         if (sessionId == null || sessionId.isBlank()) {
-            return snapshot();
+            return null;
         }
-        String removed = sessionUserMap.remove(sessionId);
-        if (removed != null) {
-            decreaseUserCount(removed);
+
+        SessionRoomUser removed = sessionStateMap.remove(sessionId);
+        if (removed == null) {
+            return null;
         }
-        return snapshot();
+
+        decreaseUserCount(removed.room(), removed.username());
+        return snapshot(removed.room());
     }
 
     @Override
-    public synchronized PresenceUpdateResponse userLeftBySessionAndName(String sessionId, String username) {
-        String normalizedUsername = normalize(username);
-        String removed = sessionId == null || sessionId.isBlank() ? null : sessionUserMap.remove(sessionId);
+    public synchronized PresenceUpdateResponse userLeftBySessionAndName(String sessionId, String username, String room) {
+        String normalizedRoom = ChatRoom.normalizeAndValidate(room);
+        String normalizedUsername = normalizeUsername(username);
 
+        SessionRoomUser removed = sessionId == null || sessionId.isBlank() ? null : sessionStateMap.remove(sessionId);
         if (removed != null) {
-            decreaseUserCount(removed);
-            return snapshot();
+            decreaseUserCount(removed.room(), removed.username());
+            return snapshot(removed.room());
         }
 
         if (normalizedUsername != null) {
-            decreaseUserCount(normalizedUsername);
+            decreaseUserCount(normalizedRoom, normalizedUsername);
         }
 
-        return snapshot();
+        return snapshot(normalizedRoom);
     }
 
     @Override
-    public synchronized String getUsernameBySession(String sessionId) {
+    public synchronized SessionRoomUser getSessionRoomUser(String sessionId) {
         if (sessionId == null || sessionId.isBlank()) {
             return null;
         }
-        return sessionUserMap.get(sessionId);
+        return sessionStateMap.get(sessionId);
     }
 
-    private PresenceUpdateResponse snapshot() {
-        List<String> users = new ArrayList<>(usernameSessionCount.keySet());
+    private PresenceUpdateResponse snapshot(String room) {
+        ConcurrentHashMap<String, Integer> userCountMap = roomUserSessionCount.get(room);
+        List<String> users = userCountMap == null ? new ArrayList<>() : new ArrayList<>(userCountMap.keySet());
         users.sort(Comparator.naturalOrder());
-        return new PresenceUpdateResponse(users.size(), users);
+        return new PresenceUpdateResponse(users.size(), users, room);
     }
 
-    private String normalize(String username) {
+    private String normalizeUsername(String username) {
         if (username == null) {
             return null;
         }
@@ -83,11 +91,14 @@ public class OnlineUserServiceImpl implements OnlineUserService {
         return trimmed.isEmpty() ? null : trimmed;
     }
 
-    private void increaseUserCount(String username) {
-        usernameSessionCount.merge(username, 1, Integer::sum);
+    private void increaseUserCount(String room, String username) {
+        roomUserSessionCount.computeIfAbsent(room, key -> new ConcurrentHashMap<>()).merge(username, 1, Integer::sum);
     }
 
-    private void decreaseUserCount(String username) {
-        usernameSessionCount.computeIfPresent(username, (key, current) -> current <= 1 ? null : current - 1);
+    private void decreaseUserCount(String room, String username) {
+        roomUserSessionCount.computeIfPresent(room, (key, userCountMap) -> {
+            userCountMap.computeIfPresent(username, (name, current) -> current <= 1 ? null : current - 1);
+            return userCountMap.isEmpty() ? null : userCountMap;
+        });
     }
 }

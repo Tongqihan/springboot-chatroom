@@ -7,6 +7,7 @@ import java.util.List;
  */
 public record PresenceUpdateResponse(
         int onlineCount,
-        List<String> users
+        List<String> users,
+        String room
 ) {
 }

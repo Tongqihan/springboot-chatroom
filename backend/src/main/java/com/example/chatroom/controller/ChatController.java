@@ -1,6 +1,7 @@
 package com.example.chatroom.controller;
 
 import com.example.chatroom.common.ApiResponse;
+import com.example.chatroom.common.ChatRoom;
 import com.example.chatroom.dto.ChatMessageResponse;
 import com.example.chatroom.service.ChatService;
 import java.util.List;
@@ -24,8 +25,9 @@ public class ChatController {
 
     @GetMapping("/recent")
     public ApiResponse<List<ChatMessageResponse>> getRecentMessages(
+            @RequestParam(defaultValue = ChatRoom.LOBBY) String room,
             @RequestParam(defaultValue = "50") int limit
     ) {
-        return ApiResponse.ok("查询成功", chatService.getRecentMessages(limit));
+        return ApiResponse.ok("查询成功", chatService.getRecentMessages(room, limit));
     }
 }

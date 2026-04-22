@@ -1,5 +1,6 @@
 package com.example.chatroom.service.impl;
 
+import com.example.chatroom.common.ChatRoom;
 import com.example.chatroom.dto.ChatMessageRequest;
 import com.example.chatroom.dto.ChatMessageResponse;
 import com.example.chatroom.dto.MessageType;
@@ -31,9 +32,12 @@ public class ChatServiceImpl implements ChatService {
     @Override
     @Transactional
     public ChatMessageResponse saveMessage(ChatMessageRequest request) {
+        String room = ChatRoom.normalizeAndValidate(request.room());
+
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setUsername(request.username().trim());
         chatMessage.setContent(request.content().trim());
+        chatMessage.setRoom(room);
         chatMessage.setTimestamp(LocalDateTime.now());
 
         ChatMessage saved = chatMessageRepository.save(chatMessage);
@@ -42,9 +46,13 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ChatMessageResponse> getRecentMessages(int limit) {
+    public List<ChatMessageResponse> getRecentMessages(String room, int limit) {
         int safeLimit = sanitizeLimit(limit);
-        List<ChatMessage> messages = chatMessageRepository.findByOrderByTimestampDesc(PageRequest.of(0, safeLimit));
+        String normalizedRoom = ChatRoom.normalizeAndValidate(room);
+        List<ChatMessage> messages = chatMessageRepository.findByRoomOrderByTimestampDesc(
+                normalizedRoom,
+                PageRequest.of(0, safeLimit)
+        );
         Collections.reverse(messages);
         return messages.stream().map(this::toResponse).toList();
     }
@@ -62,7 +70,8 @@ public class ChatServiceImpl implements ChatService {
                 message.getUsername(),
                 message.getContent(),
                 message.getTimestamp(),
-                MessageType.CHAT.name()
+                MessageType.CHAT.name(),
+                message.getRoom()
         );
     }
 }

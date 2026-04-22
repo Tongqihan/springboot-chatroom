@@ -1,8 +1,11 @@
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
+import { ROOM_LIST } from '../utils/constants';
 
 export function ChatLayout({
   nickname,
+  room,
+  onRoomChange,
   messages,
   onlineCount,
   onlineUsers,
@@ -27,6 +30,7 @@ export function ChatLayout({
         <div>
           <h1>聊天室</h1>
           <p>当前用户：{nickname}</p>
+          <p>当前房间：{room}</p>
           <p>在线人数：{onlineCount}</p>
         </div>
         <div className="chat-status-wrap">
@@ -34,6 +38,15 @@ export function ChatLayout({
           <button className="secondary" onClick={onLeave}>退出</button>
         </div>
       </header>
+
+      <section className="room-switcher">
+        <label htmlFor="room-select">切换房间</label>
+        <select id="room-select" value={room} onChange={(event) => onRoomChange(event.target.value)}>
+          {ROOM_LIST.map((roomName) => (
+            <option key={roomName} value={roomName}>{roomName}</option>
+          ))}
+        </select>
+      </section>
 
       <section className="online-users">
         <h2>在线用户</h2>

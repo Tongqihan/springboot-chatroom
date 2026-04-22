@@ -7,11 +7,14 @@ import com.example.chatroom.dto.PresenceUpdateResponse;
  */
 public interface OnlineUserService {
 
-    PresenceUpdateResponse userJoined(String sessionId, String username);
+    PresenceUpdateResponse userJoined(String sessionId, String username, String room);
 
     PresenceUpdateResponse userLeftBySession(String sessionId);
 
-    PresenceUpdateResponse userLeftBySessionAndName(String sessionId, String username);
+    PresenceUpdateResponse userLeftBySessionAndName(String sessionId, String username, String room);
 
-    String getUsernameBySession(String sessionId);
+    SessionRoomUser getSessionRoomUser(String sessionId);
+
+    record SessionRoomUser(String username, String room) {
+    }
 }

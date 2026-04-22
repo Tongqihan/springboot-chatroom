@@ -4,12 +4,15 @@ const defaultWsBaseUrl = API_BASE_URL.replace(/^http/, 'ws');
 export const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL ?? `${defaultWsBaseUrl}/ws/chat`;
 export const DEFAULT_HISTORY_LIMIT = 50;
 
+export const ROOM_LIST = ['lobby', 'tech', 'casual'];
+export const DEFAULT_ROOM = ROOM_LIST[0];
+
 export const WS_DESTINATIONS = {
   SEND_MESSAGE: '/app/chat.send',
   JOIN_CHAT: '/app/chat.join',
   LEAVE_CHAT: '/app/chat.leave',
-  TOPIC_MESSAGES: '/topic/messages',
-  TOPIC_PRESENCE: '/topic/presence',
+  roomMessages: (room) => `/topic/rooms/${room}/messages`,
+  roomPresence: (room) => `/topic/rooms/${room}/presence`,
 };
 
 export const MESSAGE_TYPE = {
