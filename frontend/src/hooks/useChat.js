@@ -3,20 +3,21 @@ import { createChatSocket, fetchRecentMessages } from '../api/chatApi';
 import { CONNECTION_STATUS } from '../utils/constants';
 import { addMessage, createInitialChatState, setHistory, setPresence } from '../store/chatStore';
 
-export function useChat(nickname) {
+export function useChat(nickname, room) {
   const [state, setState] = useState(createInitialChatState);
   const [connectionStatus, setConnectionStatus] = useState(CONNECTION_STATUS.DISCONNECTED);
   const socketRef = useRef(null);
 
   useEffect(() => {
-    if (!nickname) {
+    if (!nickname || !room) {
       return;
     }
 
     let mounted = true;
+    setState(createInitialChatState());
     setConnectionStatus(CONNECTION_STATUS.CONNECTING);
 
-    fetchRecentMessages()
+    fetchRecentMessages(room)
       .then((messages) => {
         if (!mounted) {
           return;
@@ -31,6 +32,7 @@ export function useChat(nickname) {
       });
 
     const socket = createChatSocket({
+      room,
       onMessage: (message) => {
         if (!mounted) {
           return;
@@ -48,7 +50,7 @@ export function useChat(nickname) {
           return;
         }
         setConnectionStatus(CONNECTION_STATUS.CONNECTED);
-        socket.joinChat(nickname);
+        socket.joinChat(nickname, room);
         setState((previous) => ({ ...previous, wsError: '' }));
       },
       onDisconnect: () => {
@@ -83,24 +85,24 @@ export function useChat(nickname) {
     return () => {
       mounted = false;
       if (socket.isConnected()) {
-        socket.leaveChat(nickname);
+        socket.leaveChat(nickname, room);
       }
       socket.disconnect();
       socketRef.current = null;
       setConnectionStatus(CONNECTION_STATUS.DISCONNECTED);
     };
-  }, [nickname]);
+  }, [nickname, room]);
 
   const sendMessage = useCallback(
     (content) => {
-      if (!nickname || !socketRef.current?.isConnected()) {
+      if (!nickname || !room || !socketRef.current?.isConnected()) {
         setState((previous) => ({ ...previous, wsError: 'WebSocket 未连接，消息未发送' }));
         return;
       }
 
-      socketRef.current.sendMessage({ username: nickname, content });
+      socketRef.current.sendMessage({ username: nickname, content, room });
     },
-    [nickname]
+    [nickname, room]
   );
 
   return {

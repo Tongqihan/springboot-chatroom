@@ -10,6 +10,7 @@ public record ChatMessageResponse(
         String username,
         String content,
         LocalDateTime timestamp,
-        String type
+        String type,
+        String room
 ) {
 }

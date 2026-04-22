@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
  */
 public record ChatMessageRequest(
         @NotBlank(message = "username 不能为空") @Size(max = 50, message = "username 长度不能超过 50") String username,
-        @NotBlank(message = "content 不能为空") @Size(max = 1000, message = "content 长度不能超过 1000") String content
+        @NotBlank(message = "content 不能为空") @Size(max = 1000, message = "content 长度不能超过 1000") String content,
+        @NotBlank(message = "room 不能为空") String room
 ) {
 }

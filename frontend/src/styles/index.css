@@ -50,6 +50,33 @@ input {
   font-size: 1rem;
 }
 
+
+select {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.7rem 0.8rem;
+  font-size: 1rem;
+  background: #fff;
+}
+
+.entry-form-column {
+  flex-direction: column;
+}
+
+.room-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.room-switcher label {
+  min-width: 72px;
+  color: #374151;
+  font-size: 0.95rem;
+}
+
 button {
   border: none;
   border-radius: 8px;

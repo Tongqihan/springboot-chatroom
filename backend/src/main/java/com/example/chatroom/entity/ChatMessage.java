@@ -25,6 +25,9 @@ public class ChatMessage {
     @Column(nullable = false, length = 1000)
     private String content;
 
+    @Column(nullable = false, length = 20)
+    private String room;
+
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
@@ -46,6 +49,14 @@ public class ChatMessage {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getRoom() {
+        return room;
+    }
+
+    public void setRoom(String room) {
+        this.room = room;
     }
 
     public LocalDateTime getTimestamp() {
