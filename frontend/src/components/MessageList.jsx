@@ -18,8 +18,20 @@ export function MessageList({ messages, currentUser }) {
       {messages.map((message) => {
         const type = message.type ?? MESSAGE_TYPE.CHAT;
         const isSystem = type === MESSAGE_TYPE.SYSTEM;
+
+        if (isSystem) {
+          return (
+            <li
+              key={`${message.id ?? 'temp'}-${message.timestamp}-${message.content}`}
+              className="system"
+            >
+              <p>{message.content}</p>
+            </li>
+          );
+        }
+
         const isMine = message.username === currentUser;
-        const itemClassName = isSystem ? 'system' : isMine ? 'mine' : 'theirs';
+        const itemClassName = isMine ? 'mine' : 'theirs';
 
         return (
           <li

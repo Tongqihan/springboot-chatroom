@@ -169,14 +169,18 @@ button:disabled {
 
 .message-list li.system {
   align-self: center;
-  max-width: 90%;
-  border-style: dashed;
-  border-color: #cbd5e1;
+  max-width: 92%;
+  border: 0;
+  border-radius: 999px;
   background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 0.35rem 0.9rem;
 }
 
-.message-list li.system .message-meta strong {
-  color: #475569;
+.message-list li.system p {
+  margin: 0;
 }
 
 .message-meta {

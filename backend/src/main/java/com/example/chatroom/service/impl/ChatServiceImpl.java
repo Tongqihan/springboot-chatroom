@@ -2,6 +2,7 @@ package com.example.chatroom.service.impl;
 
 import com.example.chatroom.dto.ChatMessageRequest;
 import com.example.chatroom.dto.ChatMessageResponse;
+import com.example.chatroom.dto.MessageType;
 import com.example.chatroom.entity.ChatMessage;
 import com.example.chatroom.repository.ChatMessageRepository;
 import com.example.chatroom.service.ChatService;
@@ -61,7 +62,7 @@ public class ChatServiceImpl implements ChatService {
                 message.getUsername(),
                 message.getContent(),
                 message.getTimestamp(),
-                "CHAT"
+                MessageType.CHAT.name()
         );
     }
 }
