@@ -32,13 +32,15 @@ public class ChatServiceImpl implements ChatService {
     @Override
     @Transactional
     public ChatMessageResponse saveMessage(ChatMessageRequest request) {
-        String room = ChatRoom.normalizeAndValidate(request.room());
+        String roomName = ChatRoom.normalizeAndValidate(request.room());
+        String username = sanitizeUsername(request.username());
+        String content = sanitizeContent(request.content());
 
         ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setUsername(request.username().trim());
-        chatMessage.setContent(request.content().trim());
-        chatMessage.setRoom(room);
-        chatMessage.setTimestamp(LocalDateTime.now());
+        chatMessage.setRoomName(roomName);
+        chatMessage.setUsername(username);
+        chatMessage.setContent(content);
+        chatMessage.setCreatedAt(LocalDateTime.now());
 
         ChatMessage saved = chatMessageRepository.save(chatMessage);
         return toResponse(saved);
@@ -48,9 +50,9 @@ public class ChatServiceImpl implements ChatService {
     @Transactional(readOnly = true)
     public List<ChatMessageResponse> getRecentMessages(String room, int limit) {
         int safeLimit = sanitizeLimit(limit);
-        String normalizedRoom = ChatRoom.normalizeAndValidate(room);
-        List<ChatMessage> messages = chatMessageRepository.findByRoomOrderByTimestampDesc(
-                normalizedRoom,
+        String roomName = ChatRoom.normalizeAndValidate(room);
+        List<ChatMessage> messages = chatMessageRepository.findByRoomNameOrderByCreatedAtDesc(
+                roomName,
                 PageRequest.of(0, safeLimit)
         );
         Collections.reverse(messages);
@@ -67,11 +69,33 @@ public class ChatServiceImpl implements ChatService {
     private ChatMessageResponse toResponse(ChatMessage message) {
         return new ChatMessageResponse(
                 message.getId(),
+                message.getRoomName(),
                 message.getUsername(),
                 message.getContent(),
-                message.getTimestamp(),
-                MessageType.CHAT.name(),
-                message.getRoom()
+                message.getCreatedAt(),
+                MessageType.CHAT.name()
         );
+    }
+
+    private String sanitizeUsername(String username) {
+        if (username == null) {
+            throw new IllegalArgumentException("username 不能为空");
+        }
+        String trimmed = username.trim();
+        if (trimmed.isEmpty()) {
+            throw new IllegalArgumentException("username 不能为空");
+        }
+        return trimmed;
+    }
+
+    private String sanitizeContent(String content) {
+        if (content == null) {
+            throw new IllegalArgumentException("content 不能为空");
+        }
+        String trimmed = content.trim();
+        if (trimmed.isEmpty()) {
+            throw new IllegalArgumentException("content 不能为空");
+        }
+        return trimmed;
     }
 }

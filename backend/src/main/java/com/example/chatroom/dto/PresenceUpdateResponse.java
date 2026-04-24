@@ -8,6 +8,6 @@ import java.util.List;
 public record PresenceUpdateResponse(
         int onlineCount,
         List<String> users,
-        String room
+        String roomName
 ) {
 }

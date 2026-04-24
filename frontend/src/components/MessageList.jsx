@@ -22,7 +22,7 @@ export function MessageList({ messages, currentUser }) {
         if (isSystem) {
           return (
             <li
-              key={`${message.id ?? 'temp'}-${message.timestamp}-${message.content}`}
+              key={`${message.id ?? 'temp'}-${message.createdAt}-${message.content}`}
               className="system"
             >
               <p>{message.content}</p>
@@ -35,12 +35,12 @@ export function MessageList({ messages, currentUser }) {
 
         return (
           <li
-            key={`${message.id ?? 'temp'}-${message.timestamp}-${message.username}-${message.content}`}
+            key={`${message.id ?? 'temp'}-${message.createdAt}-${message.username}-${message.content}`}
             className={itemClassName}
           >
             <div className="message-meta">
               <strong>{message.username}</strong>
-              <span>{formatTime(message.timestamp)}</span>
+              <span>{formatTime(message.createdAt)}</span>
             </div>
             <p>{message.content}</p>
           </li>

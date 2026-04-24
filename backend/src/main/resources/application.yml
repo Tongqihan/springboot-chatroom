@@ -2,16 +2,17 @@ spring:
   application:
     name: chatroom-backend
   datasource:
-    url: jdbc:h2:mem:chatroom;MODE=MYSQL;DB_CLOSE_DELAY=-1
-    username: sa
-    password:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:chatroom_db}?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
     open-in-view: false
-  h2:
-    console:
-      enabled: true
+    properties:
+      hibernate:
+        format_sql: true
 
 server:
   port: 8080

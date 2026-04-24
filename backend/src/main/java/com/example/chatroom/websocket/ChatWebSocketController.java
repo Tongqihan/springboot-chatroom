@@ -41,7 +41,7 @@ public class ChatWebSocketController {
     @MessageMapping("/chat.send")
     public void sendMessage(@Valid @Payload ChatMessageRequest request) {
         ChatMessageResponse saved = chatService.saveMessage(request);
-        messagingTemplate.convertAndSend(getRoomMessagesDestination(saved.room()), saved);
+        messagingTemplate.convertAndSend(getRoomMessagesDestination(saved.roomName()), saved);
     }
 
     @MessageMapping("/chat.join")
@@ -91,11 +91,11 @@ public class ChatWebSocketController {
     private void broadcastSystemMessage(String room, String content) {
         ChatMessageResponse systemMessage = new ChatMessageResponse(
                 null,
+                room,
                 "系统",
                 content,
                 LocalDateTime.now(),
-                MessageType.SYSTEM.name(),
-                room
+                MessageType.SYSTEM.name()
         );
         messagingTemplate.convertAndSend(getRoomMessagesDestination(room), systemMessage);
     }

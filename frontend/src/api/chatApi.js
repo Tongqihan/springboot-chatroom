@@ -22,7 +22,7 @@ async function request(path) {
 }
 
 export async function fetchRecentMessages(room, limit = DEFAULT_HISTORY_LIMIT) {
-  return request(`/api/messages/recent?room=${encodeURIComponent(room)}&limit=${limit}`);
+  return request(`/api/rooms/${encodeURIComponent(room)}/messages?limit=${limit}`);
 }
 
 export function createChatSocket({ room, onMessage, onPresence, onConnect, onDisconnect, onStompError, onWebSocketError }) {

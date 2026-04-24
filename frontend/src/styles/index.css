@@ -185,6 +185,7 @@ button:disabled {
   grid-area: room;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.75rem;
   padding: 0.9rem;
   border: 1px solid #e5e7eb;
@@ -196,6 +197,10 @@ button:disabled {
   min-width: 72px;
   color: #374151;
   font-size: 0.95rem;
+}
+
+.room-switcher input {
+  flex: 1;
 }
 
 .online-users {
@@ -325,6 +330,17 @@ button:disabled {
 .error {
   margin: 0.5rem 0;
   color: #b91c1c;
+}
+
+.field-error {
+  margin: -0.15rem 0 0;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.room-switcher-error {
+  width: 100%;
+  margin: -0.15rem 0 0;
 }
 
 .connection-error {

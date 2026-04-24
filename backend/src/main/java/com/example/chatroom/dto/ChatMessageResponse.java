@@ -7,10 +7,10 @@ import java.time.LocalDateTime;
  */
 public record ChatMessageResponse(
         Long id,
+        String roomName,
         String username,
         String content,
-        LocalDateTime timestamp,
-        String type,
-        String room
+        LocalDateTime createdAt,
+        String type
 ) {
 }

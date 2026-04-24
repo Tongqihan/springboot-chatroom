@@ -1,6 +1,7 @@
+import { useEffect, useState } from 'react';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
-import { ROOM_LIST } from '../utils/constants';
+import { getSuggestedRooms, normalizeRoomName } from '../utils/constants';
 
 export function ChatLayout({
   nickname,
@@ -15,6 +16,9 @@ export function ChatLayout({
   onSend,
   onLeave,
 }) {
+  const [roomInput, setRoomInput] = useState(room);
+  const [roomError, setRoomError] = useState('');
+  const [suggestedRooms, setSuggestedRooms] = useState(() => getSuggestedRooms());
   const isConnected = connectionStatus === 'connected';
   const statusLabelMap = {
     connected: '已连接',
@@ -23,6 +27,27 @@ export function ChatLayout({
     error: '连接异常',
   };
   const statusLabel = statusLabelMap[connectionStatus] || connectionStatus;
+
+  useEffect(() => {
+    setRoomInput(room);
+    setSuggestedRooms(getSuggestedRooms());
+  }, [room]);
+
+  const handleRoomSubmit = (event) => {
+    event.preventDefault();
+    const nextRoom = normalizeRoomName(roomInput);
+    if (!nextRoom) {
+      setRoomError('请输入房间名');
+      return;
+    }
+    if (nextRoom === room) {
+      setRoomError('');
+      return;
+    }
+    setRoomError('');
+    setRoomInput(nextRoom);
+    onRoomChange(nextRoom);
+  };
 
   return (
     <section className="chat-card">
@@ -39,14 +64,35 @@ export function ChatLayout({
         </div>
       </header>
 
-      <section className="room-switcher">
-        <label htmlFor="room-select">切换房间</label>
-        <select id="room-select" value={room} onChange={(event) => onRoomChange(event.target.value)}>
-          {ROOM_LIST.map((roomName) => (
-            <option key={roomName} value={roomName}>{roomName}</option>
+      <form className="room-switcher" onSubmit={handleRoomSubmit}>
+        <label htmlFor="room-input">切换房间</label>
+        <input
+          id="room-input"
+          value={roomInput}
+          onChange={(event) => {
+            setRoomInput(event.target.value);
+            if (roomError) {
+              setRoomError('');
+            }
+          }}
+          onBlur={() => {
+            const nextRoom = normalizeRoomName(roomInput);
+            if (nextRoom) {
+              setRoomInput(nextRoom);
+            }
+          }}
+          placeholder="输入房间名"
+          maxLength={100}
+          list="chat-room-options"
+        />
+        <datalist id="chat-room-options">
+          {suggestedRooms.map((roomName) => (
+            <option key={roomName} value={roomName} />
           ))}
-        </select>
-      </section>
+        </datalist>
+        <button type="submit" className="secondary">切换</button>
+        {roomError ? <p className="field-error room-switcher-error">{roomError}</p> : null}
+      </form>
 
       <section className="online-users">
         <h2>在线用户</h2>
